@@ -40,23 +40,9 @@ const Metrics: NextPage = () => {
             type: 'surface'
           }]}
           layout={{
-            xaxis: {
-              ticktext:['H20','C02','O2'],
-              tickvals:[-30, -45, -65, -10]
-            },
-            yaxis: {
-              nticks: 5,
-              tickfont:
-                {
-                  color:'green',
-                  family:'Old Standard TT, serif',
-                  size: 14
-                },
-              ticksuffix:'$'
-            },
-            title: 'Mt Bruno Elevation',
-            autosize: false,
-            width: 500,
+            title: 'Metrics',
+            autosize: true,
+            width: 800,
             height: 500,
             margin: {
               l: 65,
