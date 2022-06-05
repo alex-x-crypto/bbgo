@@ -452,7 +452,7 @@ func loadCrossExchangeStrategies(config *Config, stash Stash) (err error) {
 		return nil
 	}
 
-	if len(LoadedCrossExchangeStrategies) == 0 {
+	if len(loadedCrossExchangeStrategies) == 0 {
 		return errors.New("no cross exchange strategy is registered")
 	}
 
@@ -469,7 +469,7 @@ func loadCrossExchangeStrategies(config *Config, stash Stash) (err error) {
 
 		for id, conf := range configStash {
 			// look up the real struct type
-			if st, ok := LoadedCrossExchangeStrategies[id]; ok {
+			if st, ok := loadedCrossExchangeStrategies[id]; ok {
 				val, err := reUnmarshal(conf, st)
 				if err != nil {
 					return err
@@ -484,7 +484,7 @@ func loadCrossExchangeStrategies(config *Config, stash Stash) (err error) {
 }
 
 func NewStrategyFromMap(id string, conf interface{}) (SingleExchangeStrategy, error) {
-	if st, ok := LoadedExchangeStrategies[id]; ok {
+	if st, ok := loadedExchangeStrategies[id]; ok {
 		val, err := reUnmarshal(conf, st)
 		if err != nil {
 			return nil, err
@@ -504,7 +504,7 @@ func loadExchangeStrategies(config *Config, stash Stash) (err error) {
 		}
 	}
 
-	if len(LoadedExchangeStrategies) == 0 {
+	if len(loadedExchangeStrategies) == 0 && len(loadedFunctionalStrategies) == 0 {
 		return errors.New("no exchange strategy is registered")
 	}
 
@@ -544,9 +544,18 @@ func loadExchangeStrategies(config *Config, stash Stash) (err error) {
 			}
 		}
 		for id, conf := range configStash {
-
+			if inf, ok := loadedFunctionalStrategies[id]; ok {
+				// parse the function parameter types and fill the config
+				if conf, found := findParamConfigType(inf) {
+					val, err := reUnmarshal(conf, st)
+					if err != nil {
+						return nil, err
+					}
+				}
+				continue
+			}
 			// look up the real struct type
-			if _, ok := LoadedExchangeStrategies[id]; ok {
+			if _, ok := loadedExchangeStrategies[id]; ok {
 				st, err := NewStrategyFromMap(id, conf)
 				if err != nil {
 					return err
@@ -586,4 +595,20 @@ func reUnmarshal(conf interface{}, tpe interface{}) (interface{}, error) {
 	}
 
 	return val.Elem().Interface(), nil
+}
+
+func findParamConfigType(inf interface{}) (interface{}, bool) {
+	tpe := reflect.TypeOf(inf)
+	for i := 0; i < tpe.NumIn(); i++ {
+		paramType := tpe.In(i)
+		if paramType.Kind() == reflect.Ptr {
+			paramType = paramType.Elem()
+		}
+
+		if paramType.Kind() == reflect.Struct && paramType.Name() == "Config" {
+			obj := newTypeValueInterface(paramType)
+			return obj, true
+		}
+	}
+	return nil, false
 }

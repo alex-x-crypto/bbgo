@@ -2,6 +2,7 @@ package bbgo
 
 import (
 	"context"
+	"encoding/json"
 	"io/ioutil"
 	"testing"
 
@@ -215,4 +216,18 @@ func TestLoadConfig(t *testing.T) {
 		})
 	}
 
+}
+
+func Test_findParamConfigType(t *testing.T) {
+	a := func(config Config) {}
+	obj, found := findParamConfigType(a)
+	assert.True(t, found)
+
+	err := json.Unmarshal([]byte(`{
+		"imports": ["foo", "bar"]
+	}`), &obj)
+	assert.NoError(t, err)
+
+	c := obj.(*Config)
+	assert.Equal(t, []string{"foo", "bar"}, c.Imports)
 }

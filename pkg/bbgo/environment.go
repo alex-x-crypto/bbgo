@@ -9,6 +9,7 @@ import (
 	stdlog "log"
 	"math/rand"
 	"os"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -37,18 +38,25 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-var LoadedExchangeStrategies = make(map[string]SingleExchangeStrategy)
-var LoadedCrossExchangeStrategies = make(map[string]CrossExchangeStrategy)
+var loadedExchangeStrategies = make(map[string]SingleExchangeStrategy)
+var loadedCrossExchangeStrategies = make(map[string]CrossExchangeStrategy)
+var loadedFunctionalStrategies = make(map[string]interface{})
 
 func RegisterStrategy(key string, s interface{}) {
 	loaded := 0
+
+	if reflect.TypeOf(s).Kind() == reflect.Func {
+		loadedFunctionalStrategies[key] = s
+		loaded++
+	}
+
 	if d, ok := s.(SingleExchangeStrategy); ok {
-		LoadedExchangeStrategies[key] = d
+		loadedExchangeStrategies[key] = d
 		loaded++
 	}
 
 	if d, ok := s.(CrossExchangeStrategy); ok {
-		LoadedCrossExchangeStrategies[key] = d
+		loadedCrossExchangeStrategies[key] = d
 		loaded++
 	}
 
