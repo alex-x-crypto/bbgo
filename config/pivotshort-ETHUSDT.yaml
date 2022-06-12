@@ -62,7 +62,7 @@ exchangeStrategies:
 
     exit:
       # roiStopLossPercentage is the stop loss percentage of the position ROI (currently the price change)
-      roiStopLossPercentage: 2%
+      roiStopLossPercentage: 1%
 
       # roiTakeProfitPercentage is used to force taking profit by percentage of the position ROI (currently the price change)
       # force to take the profit ROI exceeded the percentage.
@@ -87,7 +87,7 @@ exchangeStrategies:
 backtest:
   sessions:
   - binance
-  startTime: "2022-01-01"
+  startTime: "2022-04-01"
   endTime: "2022-06-08"
   symbols:
   - ETHUSDT

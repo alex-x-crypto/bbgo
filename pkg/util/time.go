@@ -25,6 +25,9 @@ func UnixMilli() int64 {
 }
 
 func ParseTimeWithFormats(strTime string, formats []string) (time.Time, error) {
+	if strTime == "now" {
+		return time.Now(), nil
+	}
 	for _, format := range formats {
 		tt, err := time.Parse(format, strTime)
 		if err == nil {
